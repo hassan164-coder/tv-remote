@@ -213,7 +213,7 @@
 
     <div class="step"><div class="n">1</div><div class="c">
       <b>Enter the TV's IP address</b>
-      <input id="ipInput" inputmode="decimal" placeholder="e.g. 192.168.1.23" autocomplete="off">
+      <input id="ipInput" inputmode="decimal" placeholder="e.g. 192.168.1.23 (commas are fine)" autocomplete="off">
       <p>On the TV: Settings → General (&amp; Privacy) → Network → Network Status → IP Settings.</p>
     </div></div>
 
@@ -426,7 +426,12 @@
   $('#closeSetup').addEventListener('click', closeSetup);
   $('#sheetBg').addEventListener('click', e => { if (e.target.id === 'sheetBg') closeSetup(); });
   $('#ipInput').value = ip;
-  $('#ipInput').addEventListener('input', updateTrustLink);
+  $('#ipInput').addEventListener('input', () => {
+    // Swedish/European keypads show "," instead of "." — convert as you type
+    const el = $('#ipInput'), fixed = el.value.replace(/[,\s]/g, '.').replace(/[^0-9.]/g, '').replace(/\.{2,}/g, '.');
+    if (fixed !== el.value) el.value = fixed;
+    updateTrustLink();
+  });
   $('#trustLink').addEventListener('click', e => {
     if (!$('#ipInput').value.trim()){ e.preventDefault(); toast('Enter the TV IP first'); }
   });
