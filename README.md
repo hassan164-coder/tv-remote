@@ -1,5 +1,7 @@
 # TV Remote
 
+> **iPhone app:** Safari blocks this TV's certificate, so use the native app in [`iphone-app/`](iphone-app/) — see its README for install steps.
+
 A web-based remote for Samsung smart TVs (Tizen, 2016 and newer). It runs in Safari on iPhone, so nothing needs to be installed.
 
 **Open it:** https://hassan164-coder.github.io/tv-remote/
