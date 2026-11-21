@@ -1,0 +1,53 @@
+name: Build iPhone app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "iphone-app/**"
+      - ".github/workflows/build-iphone-app.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: Build app (unsigned — you sign it on your Mac)
+        working-directory: iphone-app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project TVRemote.xcodeproj \
+            -target TVRemote \
+            -configuration Release \
+            -sdk iphoneos \
+            SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build | tee build.log | grep -E "error:|warning:|BUILD" || true
+          test -d build/Release-iphoneos/TVRemote.app
+
+      - name: Package .ipa
+        run: |
+          mkdir Payload
+          cp -R iphone-app/build/Release-iphoneos/TVRemote.app Payload/
+          zip -qry TVRemote.ipa Payload
+          ls -lh TVRemote.ipa
+
+      - name: Publish download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: TV Remote — build ${{ github.run_number }}
+          body: Download TVRemote.ipa and install it with Sideloadly (see iphone-app/README.md).
+          files: TVRemote.ipa
+          make_latest: true
